@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import status from "http-status";
 import AppError from "../errors/appError";
 import catchAsync from "../utils/catchAsync";
@@ -41,7 +39,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
         }
 
         const { role, userId, iat } = decoded;
-
         // checking if the user is exist
         const user = await User.isUserExistsByCustomId(userId);
 
@@ -74,7 +71,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
 
         if (requiredRoles && !requiredRoles.includes(role)) {
-            throw new AppError(status.UNAUTHORIZED, 'Your not authorize!!');
+            throw new AppError(status.UNAUTHORIZED, 'Your not authorize!! eta naki?');
         };
 
         req.user = decoded as JwtPayload;
