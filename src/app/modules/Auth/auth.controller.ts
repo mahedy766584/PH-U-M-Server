@@ -11,11 +11,12 @@ const loginUser = catchAsync(async (req, res) => {
     const { refreshToken, accessToken, needsPasswordChange } = result;
 
     res.cookie('refreshToken', refreshToken, {
-        secure: config.NODE_ENV === 'production',
+        secure: config.NODE_ENV === 'production' ? true : false,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 1000 * 60 * 60 * 24 * 365,
     });
+
 
     sendResponse(res, {
         statusCode: status.OK,

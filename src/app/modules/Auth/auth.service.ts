@@ -46,7 +46,7 @@ const loginUser = async (payload: TLoginUser) => {
 
     const accessToken = createToken(
         jwtPayload,
-        config.jwt_access_secret as string, 
+        config.jwt_access_secret as string,
         config.jwt_access_expires_in as string
     );
 
@@ -54,6 +54,7 @@ const loginUser = async (payload: TLoginUser) => {
         jwtPayload,
         config.jwt_refresh_secret as string, config.jwt_refresh_expires_in as string
     );
+    console.log('Access Token Expire Time:', config.jwt_access_expires_in);
 
     return {
         accessToken,
@@ -118,7 +119,7 @@ const refreshToken = async (token: string) => {
         token,
         config.jwt_refresh_secret as string
     );
-
+    // console.log(decoded)
     const { userId, iat } = decoded;
 
     // checking if the user is exist
@@ -201,7 +202,7 @@ const forgetPassword = async (userId: string) => {
 
     sendEmail(user.email, resetUILink);
 
-    console.log('--------<',resetUILink)
+    console.log('--------<', resetUILink)
 
 };
 

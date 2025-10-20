@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import status from "http-status";
 import AppError from "../errors/appError";
 import catchAsync from "../utils/catchAsync";
@@ -10,20 +13,34 @@ import { User } from "../modules/user/user.model";
 const auth = (...requiredRoles: TUserRole[]) => {
     return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
-        const token = req.headers.authorization;
-        //if the token is sent from the client
-        if (!token) {
-            throw new AppError(status.UNAUTHORIZED, 'Your not authorize!!');
-        };
+        const authHeader = req.headers.authorization || "";
+
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+
+        if(!token){
+            throw new AppError(status.UNAUTHORIZED, 'Authorization token missing or invalid!');
+        }
+
 
         // invalid token - synchronous
         // check if the token is valid
-        const decoded = jwt.verify(token,
-            config.jwt_access_secret as string,) as JwtPayload;
+        let decoded;
+        try {
+            decoded = jwt.verify(token, config.jwt_access_secret as string) as JwtPayload;
+        } catch (err: any) {
+            if (err.name === "TokenExpiredError") {
+                throw new AppError(status.UNAUTHORIZED, "Access token expired!");
+            }
+            throw new AppError(status.UNAUTHORIZED, "Invalid token!");
+        }
+
+
+
+        if (!decoded) {
+            throw new AppError(status.UNAUTHORIZED, "Unauthorized!")
+        }
 
         const { role, userId, iat } = decoded;
-
-
 
         // checking if the user is exist
         const user = await User.isUserExistsByCustomId(userId);
@@ -64,29 +81,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
         next();
 
 
-
-        // invalid token
-        //first practice
-        // jwt.verify(
-        //     token,
-        //     config.jwt_access_secret as string,
-        //     function (err, decoded) {
-        //         if (err) {
-        //             throw new AppError(status.UNAUTHORIZED, 'Your not authorize!!');
-        //         };
-
-        //         const role = (decoded as JwtPayload).role;
-
-        //         if (requiredRoles && !requiredRoles.includes(role)) {
-        //             throw new AppError(status.UNAUTHORIZED, 'Your not authorize!!');
-        //         };
-
-        //         req.user = decoded as JwtPayload;
-        //         next();
-        //     },
-        // );
-
-        
     })
 };
 
